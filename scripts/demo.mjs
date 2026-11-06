@@ -39,3 +39,10 @@ console.log('PASS: Beacon received 404 for Atlas’s known ID. The foreign close
 assert.equal((await call(atlas, path, 200, 'PATCH', { status: 'closed' })).status, 'closed');
 assert.equal((await call(atlas, path, 200, 'PATCH', { status: 'closed' })).status, 'closed');
 console.log('PASS: Atlas closed its own item and safely repeated the request.');
+
+const activity = await call(atlas, path + '/activity', 200);
+assert.equal(activity.length, 1);
+assert.equal(activity[0].type, 'closed');
+assert.ok(Number.isFinite(Date.parse(activity[0].occurredAt)));
+await call(beacon, path + '/activity', 404);
+console.log('PASS: Atlas sees one closure event. Beacon cannot see it.');

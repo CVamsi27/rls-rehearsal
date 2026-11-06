@@ -45,6 +45,7 @@ export async function verifyRuntime(pool: Pool): Promise<void> {
   `);
   if (role.rows[0]?.safe !== true) throw new UnsafeDatabaseError();
 
+  const expected = ['items', 'closure_events'];
   const result = await pool.query<{ relname: string; safe: boolean }>(`
     SELECT c.relname, owner.rolname = 'tenantproof_migrator'
       AND c.relrowsecurity AND c.relforcerowsecurity AND row_security_active(c.oid)
@@ -57,8 +58,8 @@ export async function verifyRuntime(pool: Pool): Promise<void> {
     JOIN pg_namespace n ON n.oid = c.relnamespace
     JOIN pg_roles owner ON owner.oid = c.relowner
     WHERE n.nspname = 'tenantproof' AND c.relname = ANY($1::text[]) AND c.relkind = 'r'
-  `, [['items']]);
-  if (result.rows.length !== 1 || result.rows.some(row => !row.safe)) throw new UnsafeDatabaseError();
+  `, [expected]);
+  if (result.rows.length !== expected.length || result.rows.some(row => !row.safe)) throw new UnsafeDatabaseError();
 }
 
 export function runtimePool(connectionString: string): Pool {

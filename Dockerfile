@@ -2,8 +2,9 @@ FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --ignore-scripts
-COPY tsconfig.json ./
+COPY tsconfig.json tsconfig.web.json ./
 COPY src ./src
+COPY web ./web
 RUN npm run build
 
 FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9 AS runtime
@@ -13,6 +14,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY db/migrations ./db/migrations
+COPY public ./public
 COPY examples/workspaces.json ./examples/workspaces.json
 USER node
 EXPOSE 3000

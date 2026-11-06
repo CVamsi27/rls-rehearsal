@@ -99,3 +99,36 @@ test('broken fixture: the same unfiltered-read assertion catches the leak', asyn
   await assert.rejects(verifyRuntime(runtime), /unsafe database configuration/i);
   t.diagnostic('Control caught Beacon’s seeded row in Atlas’s unfiltered read.');
 });
+
+test('activity foreign keys reject a valid item ID from another workspace', async (t) => {
+  const { runtime } = await fixture(t);
+  const id = await seed(runtime);
+  await assert.rejects(tenantTransaction(runtime, atlas.workspaceId, (tx) => tx.query(
+    'INSERT INTO tenantproof.closure_events (workspace_id, item_id) VALUES ($1, $2)',
+    [atlas.workspaceId, id],
+  )), { code: '23503' });
+  await tenantTransaction(runtime, atlas.workspaceId, async (tx) => {
+    assert.equal((await tx.query('SELECT item_id FROM tenantproof.closure_events')).rowCount, 0);
+  });
+});
+
+test('the activity policy isolates unfiltered reads and denies forged ownership', async (t) => {
+  const { runtime } = await fixture(t);
+  await seed(runtime);
+  let beaconItemId;
+  for (const team of [atlas, beacon]) {
+    await tenantTransaction(runtime, team.workspaceId, async (tx) => {
+      const { rows } = await tx.query('SELECT id FROM tenantproof.items');
+      const id = rows[0].id;
+      await tx.query('INSERT INTO tenantproof.closure_events (workspace_id, item_id) VALUES ($1, $2)',
+        [team.workspaceId, id]);
+      if (team === beacon) beaconItemId = id;
+    });
+  }
+  const own = await tenantTransaction(runtime, atlas.workspaceId, (tx) =>
+    tx.query('SELECT workspace_id FROM tenantproof.closure_events'));
+  assert.deepEqual(own.rows, [{ workspace_id: atlas.workspaceId }]);
+  await assert.rejects(tenantTransaction(runtime, atlas.workspaceId, (tx) =>
+    tx.query('INSERT INTO tenantproof.closure_events (workspace_id, item_id) VALUES ($1, $2)',
+      [beacon.workspaceId, beaconItemId])), { code: '42501' });
+});

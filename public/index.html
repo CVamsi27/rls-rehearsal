@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="TenantProof work items and closure history for your workspace.">
+  <title>Work items · TenantProof</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script type="module" src="/assets/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">TP</span>TenantProof</div>
+      <button id="switch-workspace" class="quiet switch" type="button" hidden>Switch workspace</button>
+    </div>
+  </header>
+  <main>
+    <header class="intro">
+      <div>
+        <p class="eyebrow">Workspace ledger</p>
+        <h1>Work items</h1>
+        <p class="lede">Create a task, close it when it’s done, and check when it closed.</p>
+      </div>
+      <div id="scope" class="scope">
+        <span class="scope-dot" aria-hidden="true"></span>
+        <span id="scope-label">No workspace connected</span>
+      </div>
+    </header>
+
+    <p id="feedback" role="status" aria-live="polite"></p>
+
+    <section id="connect-panel" class="panel connect" aria-labelledby="connect-heading">
+      <h2 id="connect-heading">Open your workspace</h2>
+      <p id="key-help" class="muted">Use the bearer key issued for your workspace. For the local demo, use either sample key from the quickstart.</p>
+      <form id="connect-form">
+        <label for="key">Bearer key</label>
+        <div class="form-row">
+          <input id="key" type="password" autocomplete="off" spellcheck="false" maxlength="128" aria-describedby="key-help" required>
+          <button type="submit">Connect</button>
+        </div>
+      </form>
+    </section>
+
+    <section id="workspace-panel" class="workspace" aria-label="Connected workspace" hidden>
+      <div class="panel items">
+        <div class="panel-heading">
+          <h2>Recent items</h2>
+          <button id="refresh" class="quiet" type="button">Refresh</button>
+        </div>
+        <form id="create-form">
+          <label for="title">Item title</label>
+          <div class="form-row">
+            <input id="title" type="text" placeholder="e.g. Review the launch checklist" maxlength="120" required>
+            <button id="create-item" type="submit">Create item</button>
+          </div>
+        </form>
+        <p id="empty-items" class="empty" hidden>No work items yet.</p>
+        <ul id="items" aria-label="Work items"></ul>
+      </div>
+      <aside class="panel history" aria-labelledby="history-heading">
+        <h2 id="history-heading">Closure history</h2>
+        <p id="history-item" class="history-item" hidden></p>
+        <p id="history-note" class="muted">Select History on an item to see when it closed.</p>
+        <ol id="events"></ol>
+      </aside>
+    </section>
+    <noscript><p class="panel">Enable JavaScript to use the workspace ledger. The HTTP API is also available.</p></noscript>
+  </main>
+</body>
+</html>

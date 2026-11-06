@@ -18,6 +18,7 @@ jobs:
           cache: npm
       - run: npm ci --ignore-scripts
       - run: npm audit --audit-level=high
+      - run: npx --no-install playwright install --with-deps chromium
       - run: npm run verify
       - name: Smoke the Compose distribution
         run: |

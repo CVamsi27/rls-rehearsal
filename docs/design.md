@@ -13,7 +13,7 @@ flowchart LR
 
 ## 1. Shared tables with row level security
 
-Shared tables keep one schema and one migration history. An enabled and forced tenant policy protects both visibility and writes, even when a query omits the workspace predicate. The application role owns neither the schema nor the tables. Separate tenant schemas would isolate names and make per-tenant DDL possible, but would multiply migration and routing work. Revisit this if customers need separate backup, encryption, or residency boundaries.
+Shared tables keep one schema and one migration history. An enabled and forced tenant policy protects both visibility and writes, even when a query omits the workspace predicate. The application role owns neither the schema nor the tables. Item queries also filter by workspace. The isolation suite deliberately omits that filter so it can exercise the database policy directly. Separate tenant schemas would isolate names and make per-tenant DDL possible, but would multiply migration and routing work. Revisit this if customers need separate backup, encryption, or residency boundaries.
 
 ## 2. Explicit transactions
 

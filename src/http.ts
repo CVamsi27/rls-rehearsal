@@ -42,6 +42,11 @@ export class ItemsController {
     return this.items.get(request.workspace, readItemId(id));
   }
 
+  @Get(':id/activity')
+  activity(@Req() request: ScopedRequest, @Param('id') id: string) {
+    return this.items.activity(request.workspace, readItemId(id));
+  }
+
   @Post()
   create(@Req() request: ScopedRequest, @Body() body: unknown) {
     return this.items.create(request.workspace, readTitle(body));

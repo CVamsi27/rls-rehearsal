@@ -8,10 +8,13 @@ Send `Authorization: Bearer <key>` on item requests and `Content-Type: applicati
 | GET /v1/items | None | 200 and up to 50 items, newest first |
 | GET /v1/items/{id} | UUID path parameter | 200 and the item |
 | PATCH /v1/items/{id} | `{"status":"closed"}` | 200 and the closed item, including on repeats |
+| GET /v1/items/{id}/activity | UUID path parameter | 200 and zero or one closure event |
 | GET /healthz | None | 200 if the process is serving |
 | GET /readyz | None | 200 if the runtime role and required tables pass verification |
 
 Each item includes `id`, `title`, `status`, and an ISO UTC `createdAt`. Titles are trimmed and must contain 1–120 UTF-16 code units after trimming. Writes reject unknown fields. Errors carry `{"error":{"code":"not_found","message":"Resource not found."}}` for both an absent item and an item owned by another workspace. Other stable codes include `invalid_input` (400), `unauthorized` (401), `payload_too_large` (413), `unsupported_media_type` (415), `internal_error` (500), and `database_unavailable` (503). Every response gets an `X-Request-Id`.
+
+A closure event has the shape `{"type":"closed","occurredAt":"2026-11-06T12:00:00.000Z"}`. History is empty for open items and for items closed before history was available. An inaccessible item returns the same 404 as a missing item.
 
 ```sh
 ATLAS_KEY="$(node -p 'require("./examples/workspaces.json")[0].key')"

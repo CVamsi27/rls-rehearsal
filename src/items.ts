@@ -54,7 +54,25 @@ export class Items {
         `UPDATE tenantproof.items SET status = 'closed' WHERE workspace_id = $1 AND id = $2 AND status = 'open' RETURNING ${fields}`,
         [workspace, id],
       );
-      return result.rows[0] ?? getItem(tx, workspace, id);
+      const updated = result.rows[0];
+      if (!updated) return getItem(tx, workspace, id);
+      await tx.query(
+        'INSERT INTO tenantproof.closure_events (workspace_id, item_id) VALUES ($1, $2)',
+        [workspace, id],
+      );
+      return updated;
+    });
+  }
+
+  activity(workspace: string, id: string) {
+    return tenantTransaction(this.pool, workspace, async (tx) => {
+      await getItem(tx, workspace, id);
+      const result = await tx.query<{ type: 'closed'; occurredAt: Date }>(
+        `SELECT 'closed' AS type, occurred_at AS "occurredAt"
+         FROM tenantproof.closure_events WHERE workspace_id = $1 AND item_id = $2`,
+        [workspace, id],
+      );
+      return result.rows;
     });
   }
 }

@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import type { AddressInfo } from 'node:net';
+import { join } from 'node:path';
 import { loadKeys } from './config.js';
 import { runtimePool, UnsafeDatabaseError, verifyRuntime } from './database.js';
 import { HealthController, ItemsController, KEYS, SafeErrors, WorkspaceGuard, requestLog } from './http.js';
@@ -32,6 +33,8 @@ async function main(): Promise<void> {
       ],
     }, { logger: false, abortOnError: false, bodyParser: false });
     app.use(requestLog);
+    app.useStaticAssets(join(import.meta.dirname, '../public'), { redirect: false });
+    app.useStaticAssets(join(import.meta.dirname, 'web'), { prefix: '/assets/', index: false, redirect: false });
     app.useBodyParser('json', { limit: '8kb' });
     app.useGlobalFilters(new SafeErrors());
     app.enableShutdownHooks(['SIGINT', 'SIGTERM']);
