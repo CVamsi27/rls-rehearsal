@@ -1,0 +1,28 @@
+name: Verify
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ['v*']
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=high
+      - run: npm run verify
+      - name: Smoke the Compose distribution
+        run: |
+          docker compose up -d --build --wait
+          npm run demo
+      - name: Clean up Compose
+        if: always()
+        run: docker compose down --volumes

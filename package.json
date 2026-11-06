@@ -1,0 +1,42 @@
+{
+  "name": "tenantproof",
+  "version": "0.1.0",
+  "private": true,
+  "description": "A small NestJS and PostgreSQL starter with executable tenant isolation checks",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.22.2"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "test": "node --test test/unit.test.cjs",
+    "test:db": "node scripts/test-db.mjs",
+    "test:control": "node scripts/test-db.mjs control",
+    "verify": "npm run lint && npm run typecheck && npm run build && npm test && npm run test:db",
+    "start": "node dist/main.js",
+    "migrate": "node dist/migrate.js",
+    "demo": "node scripts/demo.mjs"
+  },
+  "dependencies": {
+    "@nestjs/common": "12.4.0",
+    "@nestjs/core": "12.4.0",
+    "@nestjs/platform-express": "12.4.0",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@types/express": "5.0.6",
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "eslint": "10.14.0",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.72.1"
+  },
+  "overrides": {
+    "minimatch": "11.0.5"
+  },
+  "type": "module"
+}
