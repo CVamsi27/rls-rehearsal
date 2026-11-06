@@ -19,8 +19,8 @@ async function call(team, path, expectedStatus, method = 'GET', body) {
   return response.json();
 }
 
-const a = await call(atlas, '', 201, 'POST', { title: 'Atlas brief ' + randomUUID().slice(0, 8) });
-const b = await call(beacon, '', 201, 'POST', { title: 'Beacon checklist ' + randomUUID().slice(0, 8) });
+const a = await call(atlas, '', 201, 'POST', { title: atlas.name + ' brief ' + randomUUID().slice(0, 8) });
+const b = await call(beacon, '', 201, 'POST', { title: beacon.name + ' checklist ' + randomUUID().slice(0, 8) });
 assert.equal(a.status, 'open');
 for (const [team, own, foreign] of [[atlas, a, b], [beacon, b, a]]) {
   const items = await call(team, '', 200);
@@ -34,15 +34,15 @@ const foreign = await call(beacon, path, 404);
 assert.deepEqual(foreign, await call(beacon, '/' + randomUUID(), 404));
 await call(beacon, path, 404, 'PATCH', { status: 'closed' });
 assert.equal((await call(atlas, path, 200)).status, 'open');
-console.log('PASS: Beacon received 404 for Atlas’s known ID. The foreign close changed nothing.');
+console.log('PASS: ' + beacon.name + ' received 404 for an item owned by ' + atlas.name + '. The foreign close changed nothing.');
 
 assert.equal((await call(atlas, path, 200, 'PATCH', { status: 'closed' })).status, 'closed');
 assert.equal((await call(atlas, path, 200, 'PATCH', { status: 'closed' })).status, 'closed');
-console.log('PASS: Atlas closed its own item and safely repeated the request.');
+console.log('PASS: ' + atlas.name + ' closed its own item and safely repeated the request.');
 
 const activity = await call(atlas, path + '/activity', 200);
 assert.equal(activity.length, 1);
 assert.equal(activity[0].type, 'closed');
 assert.ok(Number.isFinite(Date.parse(activity[0].occurredAt)));
 await call(beacon, path + '/activity', 404);
-console.log('PASS: Atlas sees one closure event. Beacon cannot see it.');
+console.log('PASS: ' + atlas.name + ' sees one closure event. ' + beacon.name + ' cannot see it.');

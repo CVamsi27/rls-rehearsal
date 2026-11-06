@@ -3,7 +3,7 @@
 | Milestone | Planned date and time (IST) | Local source |
 | --- | --- | --- |
 | Public API and isolation proof | 13 November 2026, 8 p.m. | `v0.1.0-rc.1` |
-| Browser ledger and closure history | 20 November 2026, 8 p.m. | `v0.2.0-rc.1` |
+| Browser ledger and closure history | 20 November 2026, 8 p.m. | `v0.2.0-rc.2` |
 | Case study and application materials | 27 November 2026, 8 p.m. | [Case study](case-study.md) and [pilot brief](pilot.md) |
 
 On the ship date, validate the selected candidate from a clean checkout. Record the commit, environment, test counts, clean Compose install, CLI proof, and open limitations. v0.2 also requires the browser and rollback rehearsal. Check the public branch’s GitHub Actions run before publishing the release. Publish a status update with the exact blocker if the release gate fails.

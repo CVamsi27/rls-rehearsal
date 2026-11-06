@@ -4,22 +4,22 @@ const { Pool } = require('pg');
 const { tenantTransaction, verifyRuntime } = require('../dist/database.js');
 const { atlas, beacon, fixture } = require('./helpers.cjs');
 
-async function seed(runtime) {
-  for (const team of [atlas, beacon]) {
+async function seed(runtime, atlasTitle = atlas.name, beaconTitle = beacon.name) {
+  for (const [team, title] of [[atlas, atlasTitle], [beacon, beaconTitle]]) {
     await tenantTransaction(runtime, team.workspaceId, (tx) => tx.query(
-      'INSERT INTO tenantproof.items (workspace_id, title) VALUES ($1, $2)', [team.workspaceId, team.name],
+      'INSERT INTO tenantproof.items (workspace_id, title) VALUES ($1, $2)', [team.workspaceId, title],
     ));
   }
   const beaconRow = await tenantTransaction(runtime, beacon.workspaceId, (tx) =>
-    tx.query('SELECT id FROM tenantproof.items WHERE title = $1', [beacon.name]));
+    tx.query('SELECT id FROM tenantproof.items WHERE title = $1', [beaconTitle]));
   assert.equal(beaconRow.rowCount, 1, 'Beacon fixture must exist');
   return beaconRow.rows[0].id;
 }
 
 async function assertAtlasIsolation(runtime) {
   const result = await tenantTransaction(runtime, atlas.workspaceId, (tx) =>
-    tx.query('SELECT title FROM tenantproof.items ORDER BY title'));
-  assert.deepEqual(result.rows.map((row) => row.title), ['Atlas'], 'unfiltered tenant read');
+    tx.query('SELECT workspace_id FROM tenantproof.items ORDER BY workspace_id'));
+  assert.deepEqual(result.rows.map((row) => row.workspace_id), [atlas.workspaceId], 'unfiltered tenant read');
 }
 
 test('RLS isolates unfiltered reads and foreign writes under runtime credentials', async (t) => {
@@ -87,17 +87,17 @@ test('two simultaneous transactions keep separate tenant contexts', { timeout: 5
 
 test('broken fixture: the same unfiltered-read assertion catches the leak', async (t) => {
   const { runtime, owner } = await fixture(t);
-  await seed(runtime);
+  await seed(runtime, 'Design only', 'Engineering only');
   await assertAtlasIsolation(runtime);
   await owner.query('ALTER TABLE tenantproof.items DISABLE ROW LEVEL SECURITY');
   await assert.rejects(assertAtlasIsolation(runtime), (error) => {
     assert.equal(error.code, 'ERR_ASSERTION');
-    assert.deepEqual(error.actual, ['Atlas', 'Beacon']);
-    assert.deepEqual(error.expected, ['Atlas']);
+    assert.deepEqual(error.actual, [atlas.workspaceId, beacon.workspaceId].sort());
+    assert.deepEqual(error.expected, [atlas.workspaceId]);
     return true;
   });
   await assert.rejects(verifyRuntime(runtime), /unsafe database configuration/i);
-  t.diagnostic('Control caught Beacon’s seeded row in Atlas’s unfiltered read.');
+  t.diagnostic('Control caught the other workspace’s seeded row in an unfiltered read.');
 });
 
 test('activity foreign keys reject a valid item ID from another workspace', async (t) => {

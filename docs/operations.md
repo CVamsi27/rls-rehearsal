@@ -18,7 +18,7 @@ For an adapted installation, apply migrations with `MIGRATION_DATABASE_URL` and 
 From a checkout with both candidate refs, run:
 
 ```sh
-npm run rehearse -- v0.1.0-rc.1 v0.2.0-rc.1
+npm run rehearse -- v0.1.0-rc.1 v0.2.0-rc.2
 ```
 
 The script builds each image from its Git revision. It creates its own Compose project, ephemeral loopback port, and data volume. It checks both teams before and after each step, stops and restarts PostgreSQL, and measures a small concurrent list baseline. It removes the rehearsal resources on exit.

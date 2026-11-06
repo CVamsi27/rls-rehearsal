@@ -25,7 +25,7 @@ npm run build
 npm run test:control
 ```
 
-The demo creates one item per team, checks each list, tries a foreign read and close with the known item ID, and repeats a valid close. The broken control starts its own PostgreSQL container and prints the unexpected Beacon row it detected in Atlas’s result. Both commands exit nonzero on an unexpected result.
+The demo creates one item per team, checks each list, tries a foreign read and close with the known item ID, and repeats a valid close. The broken control starts its own PostgreSQL container and reports that it detected another workspace’s seeded row. Both commands exit nonzero on an unexpected result.
 
 The Compose profile uses public synthetic credentials and binds the app to loopback. Set `APP_PORT` and the matching `DEMO_URL` if port 3100 is in use. `docker compose down` stops it and preserves the local volume. Add `--volumes` to discard the demo data.
 
