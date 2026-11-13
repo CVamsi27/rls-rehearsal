@@ -1,6 +1,6 @@
 # Design and decision records
 
-TenantProof is for SaaS engineers who want a small example of shared-table isolation and a test they can adapt. A useful first run ends with one successful workflow per team, a rejected foreign operation, and a broken fixture that proves the assertion can detect cross-tenant data.
+RLS Rehearsal is for SaaS engineers who want a small example of shared-table isolation and a test they can adapt. A useful first run ends with one successful workflow per team, a rejected foreign operation, and a broken fixture that proves the assertion can detect cross-tenant data.
 
 ```mermaid
 flowchart LR
@@ -29,3 +29,5 @@ The operator maps high-entropy key digests to workspace IDs. This keeps the exam
 2. Grant only the required verbs and columns. For a reference between tenant tables, constrain the parent key with `(workspace_id, id)` so an otherwise valid ID from another workspace cannot satisfy the reference.
 3. Include the new table in the runtime checks. Add the repository query inside the existing scoped transaction.
 4. Seed two tenants. Check unfiltered reads, forged inserts, foreign IDs, and access with no scope. Introduce a broken policy in a separate fixture and verify the assertion detects it.
+
+Use [Module 1 of the learning sprint](learning-plan.md) to practice these decisions, then run the [outcome checks](outcome-verification.md) against your implementation.

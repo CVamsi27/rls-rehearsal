@@ -1,4 +1,4 @@
-# TenantProof
+# RLS Rehearsal
 
 A small NestJS and PostgreSQL starter with an executable answer to a SaaS question. **What happens when an application query forgets the workspace filter?**
 
@@ -28,6 +28,10 @@ npm run test:control
 The demo creates one item per team, checks each list, tries a foreign read and close with the known item ID, and repeats a valid close. The broken control starts its own PostgreSQL container and reports that it detected another workspace’s seeded row. Both commands exit nonzero on an unexpected result.
 
 The Compose profile uses public synthetic credentials and binds the app to loopback. Set `APP_PORT` and the matching `DEMO_URL` if port 3100 is in use. `docker compose down` stops it and preserves the local volume. Add `--volumes` to discard the demo data.
+
+## Learn by rebuilding it
+
+The [learning sprint](docs/learning-plan.md) pairs short prerequisite readings with build exercises, failure drills, and senior review questions. It offers a 21-day full rehearsal and a 10-day fast path that adds one closure-evidence slice and ends in a defense. Use the [outcome checklist](docs/outcome-verification.md) to verify each release and record what the evidence supports.
 
 ## Use and extend it
 

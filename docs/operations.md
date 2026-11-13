@@ -15,13 +15,13 @@ For an adapted installation, apply migrations with `MIGRATION_DATABASE_URL` and 
 
 ## Rehearse using release images
 
-From a checkout with both candidate refs, run:
+From a checkout with both reference tags, run:
 
 ```sh
 npm run rehearse -- v0.1.0-rc.1 v0.2.0-rc.2
 ```
 
-The script builds each image from its Git revision. It creates its own Compose project, ephemeral loopback port, and data volume. It checks both teams before and after each step, stops and restarts PostgreSQL, and measures a small concurrent list baseline. It removes the rehearsal resources on exit.
+For a new release, substitute the two candidate refs and record the results using the [outcome verification checklist](outcome-verification.md). The script builds each image from its Git revision. It creates its own Compose project, ephemeral loopback port, and data volume. It checks both teams before and after each step, stops and restarts PostgreSQL, and measures a small concurrent list baseline. It removes the rehearsal resources on exit.
 
 ## Upgrade and roll back
 

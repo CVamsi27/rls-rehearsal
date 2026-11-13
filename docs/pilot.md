@@ -9,4 +9,4 @@ Give the pilot the release link, the README, and this task. Ask them to start fr
 
 Capture the candidate commit, OS, Docker and Node versions, time to first successful task, completion of each step, and the first blocker or confusing instruction. Ask whether they would try the pattern on a disposable copy of their own schema. Report a completed walkthrough as external validation. Report adoption only once someone uses it in their workflow.
 
-Pilot status for the local candidates is **pending**.
+Pilot status for the local candidates is **pending**. The renamed-fixture exercise has passed in a maintainer’s local rehearsal. Record an independent run separately using the [evidence record](outcome-verification.md#evidence-record).
