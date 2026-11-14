@@ -1,25 +1,31 @@
 {
   "name": "tenantproof",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "A small NestJS and PostgreSQL starter with executable tenant isolation checks",
   "license": "MIT",
   "engines": {
     "node": ">=24.22.2"
   },
+  "workspaces": [
+    "cli"
+  ],
   "scripts": {
     "build": "tsc && tsc -p tsconfig.web.json",
-    "typecheck": "tsc --noEmit && tsc -p tsconfig.web.json --noEmit",
+    "build:cli": "npm run build -w rls-rehearsal",
+    "typecheck": "tsc --noEmit && tsc -p tsconfig.web.json --noEmit && npm run typecheck -w rls-rehearsal",
     "lint": "eslint .",
-    "test": "node --test test/unit.test.cjs",
+    "test": "node --test test/unit.test.cjs && npm test -w rls-rehearsal",
     "test:db": "node scripts/test-db.mjs",
+    "test:cli:db": "node scripts/test-db.mjs cli",
     "test:control": "node scripts/test-db.mjs control",
-    "verify": "npm run lint && npm run typecheck && npm run build && npm test && npm run test:db",
+    "verify": "npm run lint && npm run typecheck && npm run build && npm run build:cli && npm test && npm run test:db",
     "start": "node dist/main.js",
     "migrate": "node dist/migrate.js",
     "demo": "node scripts/demo.mjs",
     "test:browser": "node scripts/test-db.mjs browser",
-    "rehearse": "node scripts/rehearse.mjs"
+    "rehearse": "node scripts/rehearse.mjs",
+    "pack:cli": "npm pack -w rls-rehearsal"
   },
   "dependencies": {
     "@nestjs/common": "12.4.0",

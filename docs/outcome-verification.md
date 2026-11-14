@@ -48,6 +48,26 @@ Then run the [image rehearsal](operations.md#rehearse-using-release-images) with
 | The measurement is reproducible | Record sample size, concurrency, row count, errors, p95, and the query plan. The built-in rehearsal uses 80 list calls at concurrency four after adding 2,000 synthetic items. Check the actual scan. Treat latency as a local baseline. |
 | A new reader can finish | Run the [independent pilot](pilot.md) and record the result. A maintainer’s walkthrough verifies the instructions locally. An independent walkthrough verifies usability. Use in the pilot’s own workflow is a separate adoption outcome. |
 
+## CLI milestone (v0.3)
+
+Use a disposable PostgreSQL database with at least one row per tenant. The CLI must run as a restricted role; the control pass is the only privileged connection.
+
+```sh
+npm run build:cli
+export RLS_REHEARSAL_DATABASE_URL='postgres://tenantproof_runtime:...@127.0.0.1:5432/demo'
+export RLS_REHEARSAL_ADMIN_URL='postgres://postgres:...@127.0.0.1:5432/demo'
+node cli/dist/main.js doctor --config examples/rls-rehearsal.config.json
+node cli/dist/main.js run --config examples/rls-rehearsal.config.json --format json,md,junit --control
+```
+
+| Claim | Required observation |
+| --- | --- |
+| The matrix tests the database, not the query | Each actor sees only its own rows in an unfiltered read. A second actor's row is absent even though the row exists. |
+| Writes are denied and rolled back | A foreign insert raises a row-level security denial, an own insert succeeds, and the item count after the run is unchanged. A foreign update affects zero rows. |
+| The assertion can fail | Control mode disables RLS in a privileged transaction and observes the foreign rows. With RLS disabled on the test table, the matrix reports the leak and exits nonzero. |
+| The target is safe to test | A non-loopback host is refused without `--allow-remote`. A superuser tested role is refused without `--allow-privileged`. Passwords do not appear in console output or reports. |
+| The package is adoptable | `init` writes a valid config, `doctor` names missing tables or policies, reports parse as JSON/Markdown/JUnit, and the packed tarball contains `dist/main.js`. |
+
 ## Evidence record
 
 Copy this into your sprint notes once per milestone or regression. Keep the shortest useful excerpt of each result and use synthetic data.

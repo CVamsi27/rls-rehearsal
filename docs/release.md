@@ -5,6 +5,7 @@
 | Public API and isolation proof | 13 November 2026, 8 p.m. | `v0.1.0-rc.1` |
 | Browser ledger and closure history | 20 November 2026, 8 p.m. | `v0.2.0-rc.2` |
 | Case study and application materials | 27 November 2026, 8 p.m. | [Case study](case-study.md) and [pilot brief](pilot.md) |
+| Reusable CLI and GitHub Action | 13 November 2026 | `v0.3.0` candidate |
 
 These are the checkpoints from the 21-day rehearsal. If you start later, shift every checkpoint by the same number of working days; do not compress the verification to keep a date. The [10-day fast path](learning-plan.md#fast-path--closure-evidence-and-delivery-status) replaces the three checkpoints with one defense but keeps the same evidence standard.
 
@@ -17,5 +18,22 @@ On the ship date, validate the selected candidate from a clean checkout with the
 The initial publication happened on 13 November 2026: the public repository `CVamsi27/rls-rehearsal` was created from the branded v0.2 `main`, the `main` Verify run passed, and `v0.2.0` was tagged and released. The `v0.1.0-rc.1` and `v0.2.0-rc.2` tags were pushed unchanged as historical references, so the API-only and browser snapshots remain available even though the planned separate v0.1 release was not cut. See the [v0.2.0 release](https://github.com/CVamsi27/rls-rehearsal/releases/tag/v0.2.0).
 
 For a future release, create a candidate from the default branch, verify it from a clean checkout, push the candidate, then tag and release only after the hosted Verify run passes. Use [the changelog](../CHANGELOG.md) and the measured verification results as the release notes. The release’s source archive is the supported artifact. A clean checkout and Docker Compose are the install path.
+
+## v0.3.0 CLI and Action
+
+The `rls-rehearsal` package is prepared in [`cli/`](../cli/) at version `0.3.0`; the root version and changelog match. The source archive and a local checkout are the supported install path until npm publication.
+
+Verification before tagging:
+
+```sh
+npm ci --ignore-scripts
+npm run verify
+npm pack -w rls-rehearsal --pack-destination /tmp
+tar -tzf /tmp/rls-rehearsal-0.3.0.tgz | grep 'package/dist/main.js'
+```
+
+The integration suite uses disposable PostgreSQL and covers the healthy matrix, rollback of write checks, control-mode leak detection, `doctor`, and the privileged-role guard.
+
+npm publication is a separate authenticated step. Add an `NPM_TOKEN` repository secret, then push `v0.3.0` (or run the **Publish CLI** workflow manually). The workflow runs lint, type checks, builds, unit tests and `npm publish -w rls-rehearsal --access public --provenance`. Until that succeeds, do not claim `npx rls-rehearsal` as a published install path; use `node cli/dist/main.js` from a checkout.
 
 Record whether a pilot completed the quickstart and adapted a fixture. If no independent run has happened, report external validation as pending.

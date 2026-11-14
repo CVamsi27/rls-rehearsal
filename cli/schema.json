@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://raw.githubusercontent.com/CVamsi27/rls-rehearsal/main/cli/schema.json",
+  "title": "RLS Rehearsal configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "connection", "actors", "resources"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "version": { "const": 1 },
+    "connection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["env"],
+      "properties": {
+        "env": { "$ref": "#/definitions/envName" }
+      }
+    },
+    "actors": {
+      "type": "object",
+      "minProperties": 2,
+      "propertyNames": { "$ref": "#/definitions/identifier" },
+      "additionalProperties": { "$ref": "#/definitions/actor" }
+    },
+    "resources": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "$ref": "#/definitions/identifier" },
+      "additionalProperties": { "$ref": "#/definitions/resource" }
+    },
+    "checks": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/check" }
+    },
+    "defaults": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "statementTimeoutMs": { "type": "integer", "minimum": 100, "maximum": 60000 },
+        "failOnEmpty": { "type": "boolean" }
+      }
+    }
+  },
+  "definitions": {
+    "envName": {
+      "type": "string",
+      "pattern": "^[A-Z_][A-Z0-9_]*$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_$]*$"
+    },
+    "actor": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "tenant": { "type": "string", "minLength": 1 },
+        "tenantEnv": { "$ref": "#/definitions/envName" },
+        "role": { "$ref": "#/definitions/identifier" },
+        "connectionEnv": { "$ref": "#/definitions/envName" },
+        "claims": { "type": "object" },
+        "settings": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      },
+      "oneOf": [
+        { "required": ["tenant"] },
+        { "required": ["tenantEnv"] }
+      ]
+    },
+    "resource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["table", "tenantColumn"],
+      "properties": {
+        "table": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_$]*(\\.[A-Za-z_][A-Za-z0-9_$]*)?$"
+        },
+        "tenantColumn": { "$ref": "#/definitions/identifier" },
+        "identifierColumns": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/identifier" }
+        },
+        "minRows": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "param": {
+      "oneOf": [
+        { "type": ["string", "number", "boolean", "null"] },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["fromActor", "fromResource"],
+          "properties": {
+            "fromActor": { "$ref": "#/definitions/identifier" },
+            "fromResource": { "$ref": "#/definitions/identifier" },
+            "column": { "$ref": "#/definitions/identifier" },
+            "index": { "type": "integer", "minimum": 0 }
+          }
+        }
+      ]
+    },
+    "expectation": {
+      "type": "object",
+      "additionalProperties": false,
+      "minProperties": 1,
+      "maxProperties": 1,
+      "properties": {
+        "rows": { "type": "integer", "minimum": 0 },
+        "atMostRows": { "type": "integer", "minimum": 0 },
+        "atLeastRows": { "type": "integer", "minimum": 0 },
+        "denied": { "const": true },
+        "succeeds": { "const": true },
+        "sqlstate": { "type": "string", "pattern": "^[0-9A-Za-z]{5}$" }
+      }
+    },
+    "check": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "actor", "sql", "expect"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1, "maxLength": 81 },
+        "actor": { "$ref": "#/definitions/identifier" },
+        "resource": { "$ref": "#/definitions/identifier" },
+        "kind": { "enum": ["read", "write"] },
+        "description": { "type": "string" },
+        "sql": { "type": "string", "minLength": 1 },
+        "params": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/param" }
+        },
+        "expect": { "$ref": "#/definitions/expectation" }
+      }
+    }
+  }
+}

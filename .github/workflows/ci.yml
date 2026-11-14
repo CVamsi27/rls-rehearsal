@@ -27,3 +27,20 @@ jobs:
       - name: Clean up Compose
         if: always()
         run: docker compose down --volumes
+  package:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Pack the publishable CLI
+        run: npm pack -w rls-rehearsal --pack-destination "$RUNNER_TEMP"
+      - name: Check the package contents
+        run: |
+          tar -tzf "$RUNNER_TEMP"/rls-rehearsal-*.tgz | grep -q 'package/dist/main.js'
+          tar -tzf "$RUNNER_TEMP"/rls-rehearsal-*.tgz | grep -q 'package/README.md'
+          tar -tzf "$RUNNER_TEMP"/rls-rehearsal-*.tgz | grep -q 'package/LICENSE'

@@ -1,5 +1,8 @@
 /node_modules/
 /dist/
+/cli/dist/
+/cli/node_modules/
+/.rls-rehearsal/
 /test-results/
 /playwright-report/
 .env

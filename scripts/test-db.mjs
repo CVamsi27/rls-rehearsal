@@ -6,8 +6,9 @@ import pg from 'pg';
 
 const mode = process.argv[2] ?? 'all';
 const entries = {
-  all: [process.execPath, '--test', '--test-concurrency=1', 'test/database.test.cjs', 'test/http.test.cjs', 'test/browser.test.cjs'],
+  all: [process.execPath, '--test', '--test-concurrency=1', 'test/database.test.cjs', 'test/http.test.cjs', 'test/browser.test.cjs', 'test/cli-database.test.cjs'],
   browser: [process.execPath, '--test', 'test/browser.test.cjs'],
+  cli: [process.execPath, '--test', '--test-concurrency=1', 'test/cli-database.test.cjs'],
   control: [process.execPath, '--test', '--test-name-pattern=broken fixture', 'test/database.test.cjs'],
 };
 const command = entries[mode];

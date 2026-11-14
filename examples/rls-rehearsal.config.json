@@ -1,0 +1,93 @@
+{
+  "$schema": "../cli/schema.json",
+  "version": 1,
+  "connection": {
+    "env": "RLS_REHEARSAL_DATABASE_URL"
+  },
+  "actors": {
+    "atlas": {
+      "tenant": "a0000000-0000-4000-8000-000000000001",
+      "settings": {
+        "tenantproof.workspace_id": "a0000000-0000-4000-8000-000000000001"
+      }
+    },
+    "beacon": {
+      "tenant": "b0000000-0000-4000-8000-000000000002",
+      "settings": {
+        "tenantproof.workspace_id": "b0000000-0000-4000-8000-000000000002"
+      }
+    }
+  },
+  "resources": {
+    "items": {
+      "table": "tenantproof.items",
+      "tenantColumn": "workspace_id",
+      "identifierColumns": ["id"],
+      "minRows": 1
+    },
+    "closure_events": {
+      "table": "tenantproof.closure_events",
+      "tenantColumn": "workspace_id",
+      "identifierColumns": ["item_id"],
+      "minRows": 0
+    }
+  },
+  "checks": [
+    {
+      "name": "atlas cannot read a beacon item by id",
+      "actor": "atlas",
+      "resource": "items",
+      "sql": "SELECT id FROM tenantproof.items WHERE id = $1",
+      "params": [
+        { "fromActor": "beacon", "fromResource": "items", "column": "id" }
+      ],
+      "expect": { "rows": 0 }
+    },
+    {
+      "name": "beacon cannot read an atlas item by id",
+      "actor": "beacon",
+      "resource": "items",
+      "sql": "SELECT id FROM tenantproof.items WHERE id = $1",
+      "params": [
+        { "fromActor": "atlas", "fromResource": "items", "column": "id" }
+      ],
+      "expect": { "rows": 0 }
+    },
+    {
+      "name": "atlas cannot insert into beacon",
+      "actor": "atlas",
+      "kind": "write",
+      "sql": "INSERT INTO tenantproof.items (workspace_id, title) VALUES ($1, $2)",
+      "params": [
+        { "fromActor": "beacon", "fromResource": "items", "column": "workspace_id" },
+        "rls-rehearsal foreign insert"
+      ],
+      "expect": { "denied": true }
+    },
+    {
+      "name": "atlas can insert its own item",
+      "actor": "atlas",
+      "kind": "write",
+      "sql": "INSERT INTO tenantproof.items (workspace_id, title) VALUES ($1, $2)",
+      "params": [
+        { "fromActor": "atlas", "fromResource": "items", "column": "workspace_id" },
+        "rls-rehearsal own insert"
+      ],
+      "expect": { "succeeds": true }
+    },
+    {
+      "name": "beacon cannot update an atlas item",
+      "actor": "beacon",
+      "kind": "write",
+      "sql": "UPDATE tenantproof.items SET status = 'closed' WHERE id = $1",
+      "params": [
+        { "fromActor": "atlas", "fromResource": "items", "column": "id" }
+      ],
+      "expect": { "rows": 0 }
+    }
+  ],
+  "defaults": {
+    "statementTimeoutMs": 5000,
+    "failOnEmpty": true
+  }
+}
