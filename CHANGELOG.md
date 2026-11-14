@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0
+
+- Add the publishable `rls-rehearsal` CLI: config-driven actors, tenant matrix, explicit read/write checks, JWT claims, PostgreSQL settings and unconditional rollback.
+- Add control mode, which disables RLS in a privileged transaction and fails when the same assertion cannot detect a leak.
+- Add JSON, Markdown and JUnit reports, `init`, `doctor`, safety guards for remote and privileged targets, and a composite GitHub Action.
+- Add CLI unit and disposable-PostgreSQL integration tests, a Supabase recipe and a package smoke check.
+
 ## 0.2.0
 
 - Same-origin work-item ledger with workspace switching, keyboard navigation, and closure history.

@@ -31,3 +31,15 @@ The operator maps high-entropy key digests to workspace IDs. This keeps the exam
 4. Seed two tenants. Check unfiltered reads, forged inserts, foreign IDs, and access with no scope. Introduce a broken policy in a separate fixture and verify the assertion detects it.
 
 Use [Module 1 of the learning sprint](learning-plan.md) to practice these decisions, then run the [outcome checks](outcome-verification.md) against your implementation.
+
+## 4. Reusable isolation CLI
+
+The demo answers the question for one schema. The `rls-rehearsal` CLI generalizes the same evidence without turning the demo into a framework. The config names actors (role, tenant, JWT claims, custom settings) and resources (table, tenant column, identifier columns). A run opens one transaction per actor, applies the session state, and reads every resource without an application filter. A row whose tenant differs from the actor's tenant is a leak.
+
+Explicit checks cover the cases a matrix cannot: a foreign ID returning zero rows, a forged insert rejected with SQLSTATE `42501`, an update affecting zero rows, or an allowed operation. Parameter references are resolved as the other actor, so the check uses an ID that tenant can legitimately see. Every transaction is rolled back; no fixture change is committed.
+
+Control mode is the answer to "how do you know the test can fail?". It connects with a privileged role, runs `SET LOCAL row_security = off`, and repeats the read. When foreign rows exist, the control must see them; if it does not, the assertion is filtering by tenant itself and the run fails. The control never alters a table and requires a disposable admin connection.
+
+The CLI refuses non-loopback hosts unless `--allow-remote` is passed, refuses a tested superuser or `BYPASSRLS` role unless `--allow-privileged` is passed, and verifies that `SET LOCAL ROLE` took effect. It redacts passwords and writes only metadata, tenant values and sampled identifiers. This is a test harness, not an authorization layer: a green run is evidence for the configured roles and tables, not proof that every policy or application path is safe.
+
+The package lives in [`cli/`](../cli/) and is versioned with the repository. The NestJS demo remains the executable reference; the CLI is the adoption path for teams with their own schema.

@@ -1,0 +1,45 @@
+{
+  "name": "rls-rehearsal",
+  "version": "0.3.0",
+  "description": "Run row level security isolation checks against PostgreSQL and fail the build when one tenant can reach another tenant's rows.",
+  "license": "MIT",
+  "type": "module",
+  "bin": {
+    "rls-rehearsal": "./dist/main.js"
+  },
+  "main": "./dist/index.js",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=24.22.2"
+  },
+  "keywords": [
+    "postgresql",
+    "row-level-security",
+    "rls",
+    "multi-tenant",
+    "supabase",
+    "isolation",
+    "testing"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --test test/",
+    "prepack": "npm run build"
+  },
+  "dependencies": {
+    "pg": "8.23.1"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "@types/pg": "8.23.1",
+    "typescript": "5.9.3"
+  }
+}

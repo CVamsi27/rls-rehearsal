@@ -1,6 +1,7 @@
 FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3dffa9ed5ab39e11cf6c70e9 AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
+COPY cli/package.json ./cli/package.json
 RUN npm ci --ignore-scripts
 COPY tsconfig.json tsconfig.web.json ./
 COPY src ./src
@@ -11,6 +12,7 @@ FROM node:24.22.2-bookworm-slim@sha256:01d566e8d94d8c619591d78652babfccd3c6992a3
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package.json package-lock.json ./
+COPY cli/package.json ./cli/package.json
 RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY db/migrations ./db/migrations

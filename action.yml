@@ -1,0 +1,85 @@
+name: RLS Rehearsal
+description: Run PostgreSQL row level security isolation checks and fail when a tenant can reach another tenant's rows.
+author: Vamsi Krishna Chandaluri
+branding:
+  icon: shield
+  color: blue
+
+inputs:
+  database-url:
+    description: PostgreSQL URL for the restricted connection used by the actors.
+    required: true
+  config:
+    description: Path to the rls-rehearsal config file.
+    required: false
+    default: rls-rehearsal.config.json
+  version:
+    description: Version of the rls-rehearsal npm package to run.
+    required: false
+    default: latest
+  control:
+    description: Run control mode. Requires admin-database-url.
+    required: false
+    default: "false"
+  admin-database-url:
+    description: Privileged PostgreSQL URL for control mode. Use a disposable database.
+    required: false
+    default: ""
+  formats:
+    description: Comma-separated report formats (json, md, junit).
+    required: false
+    default: json,md,junit
+  output-directory:
+    description: Directory for report files.
+    required: false
+    default: .rls-rehearsal
+  allow-privileged:
+    description: Allow a superuser or BYPASSRLS tested role. Prefer a restricted role.
+    required: false
+    default: "false"
+  node-version:
+    description: Node.js version used to run the CLI.
+    required: false
+    default: "24"
+
+outputs:
+  report-path:
+    description: Directory containing the generated reports.
+    value: ${{ steps.run.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@v6
+      with:
+        node-version: ${{ inputs.node-version }}
+
+    - id: run
+      shell: bash
+      env:
+        RLS_REHEARSAL_DATABASE_URL: ${{ inputs.database-url }}
+        RLS_REHEARSAL_ADMIN_URL: ${{ inputs.admin-database-url }}
+        RLS_CONFIG: ${{ inputs.config }}
+        RLS_VERSION: ${{ inputs.version }}
+        RLS_FORMATS: ${{ inputs.formats }}
+        RLS_OUT: ${{ inputs.output-directory }}
+        RLS_CONTROL: ${{ inputs.control }}
+        RLS_ALLOW_PRIVILEGED: ${{ inputs.allow-privileged }}
+      run: |
+        set -euo pipefail
+        args=(run --config "$RLS_CONFIG" --format "$RLS_FORMATS" --out "$RLS_OUT" --allow-remote)
+        if [ "$RLS_CONTROL" = "true" ]; then
+          args+=(--control)
+        fi
+        if [ "$RLS_ALLOW_PRIVILEGED" = "true" ]; then
+          args+=(--allow-privileged)
+        fi
+        npx --yes "rls-rehearsal@${RLS_VERSION}" "${args[@]}"
+        echo "report-path=${RLS_OUT}" >> "$GITHUB_OUTPUT"
+
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: rls-rehearsal-report
+        path: ${{ inputs.output-directory }}
+        if-no-files-found: ignore
